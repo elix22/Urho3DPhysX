@@ -1,2 +1,2 @@
 # Urho3DPhysX
-PhysX addon for Urho3D - Instructions comming soon
+[WIP]PhysX addon for Urho3D - Instructions comming soon
