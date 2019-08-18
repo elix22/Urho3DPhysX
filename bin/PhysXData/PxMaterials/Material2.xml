@@ -1,0 +1,5 @@
+<PxMaterial>
+    <dynamicFriction value="1000" />
+    <staticFriction value="1000" />
+    <restitution value="0" />
+</PxMaterial>
