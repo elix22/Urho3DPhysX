@@ -44,6 +44,7 @@ void PhysXSamples::Start()
     Console* c = GetSubsystem<Engine>()->CreateConsole();
     c->SetDefaultStyle(defStyle);
     RegisterPhysXLibrary(context_);
+
     context_->RegisterSubsystem<Physics>();
     Physics* physics = GetSubsystem<Physics>();
     physics->SetDefBraodPhaseType(PxBroadPhaseType::eABP);
