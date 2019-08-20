@@ -8,7 +8,8 @@
 #include <Urho3D/Graphics/DebugRenderer.h>
 
 Urho3DPhysX::RigidActor::RigidActor(Context * context) : Component(context),
-isApplyingTransform_(false)
+isApplyingTransform_(false),
+pxScene_(nullptr)
 {
 }
 
@@ -113,6 +114,13 @@ void Urho3DPhysX::RigidActor::RemoveJoint(Joint * joint)
     {
         OnJointRemoved(joint);
     }
+}
+
+void Urho3DPhysX::RigidActor::RemoveFromScene()
+{
+    if (pxScene_)
+        pxScene_->RemoveActor(this);
+    pxScene_.Reset();
 }
 
 void Urho3DPhysX::RigidActor::ReleaseActor()

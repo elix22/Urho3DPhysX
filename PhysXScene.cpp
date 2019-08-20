@@ -66,7 +66,8 @@ timeAcc_(0.0f)
 
 Urho3DPhysX::PhysXScene::~PhysXScene()
 {
-    ReleaseScene();
+    //ReleaseScene();
+    pxScene_->release();
 }
 
 void Urho3DPhysX::PhysXScene::RegisterObject(Context * context)
@@ -200,7 +201,6 @@ bool Urho3DPhysX::PhysXScene::RaycastSingle(PhysXRaycastResult & result, const R
         filter.data.word0 = mask;
         if (pxScene_->raycast(ToPxVec3(ray.origin_), ToPxVec3(ray.direction_), Clamp(maxDistance, 0.0f, M_INFINITY), buffer, DEF_RAYCAST_FLAGS, filter))
         {
-            URHO3D_LOGDEBUG("Num hits: " + String(buffer.getNbAnyHits()));
             if (buffer.hasBlock)
             {
                 const PxRaycastHit& block = buffer.block;
@@ -280,6 +280,8 @@ void Urho3DPhysX::PhysXScene::RemoveActor(RigidActor * actor)
 {
     if (actor && pxScene_)
     {
+        for (auto* a : rigidActors_)
+            a->RemoveFromScene();
         pxScene_->removeActor(*actor->GetActor());
         rigidActors_.Remove(actor);
     }
@@ -515,7 +517,6 @@ bool Urho3DPhysX::PhysXScene::SweepSingle(PhysXRaycastResult & result, const Ray
         filter.data.word0 = mask;
         if (pxScene_->sweep(geometry, ToPxTransform(ray.origin_, rotation), ToPxVec3(ray.direction_), maxDistance, buffer, DEF_RAYCAST_FLAGS, filter))
         {
-            URHO3D_LOGDEBUG("Num hits: " + String(buffer.getNbAnyHits()));
             if (buffer.hasBlock)
             {
                 const PxSweepHit& block = buffer.block;
@@ -535,11 +536,8 @@ void Urho3DPhysX::PhysXScene::ReleaseScene()
 {
     if (pxScene_)
     {
-        for (auto* a : rigidActors_)
-        {
-            pxScene_->removeActor(*a->GetActor());
-        }
         UnsubscribeFromEvent(E_SCENESUBSYSTEMUPDATE);
+        
         pxScene_->release();
         pxScene_ = nullptr;
     }

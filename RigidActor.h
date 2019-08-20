@@ -42,6 +42,7 @@ namespace Urho3DPhysX
         ///
         bool IsApplyingTransform() const { return isApplyingTransform_; }
         ///
+        void RemoveFromScene();
         ///remove actor
         void ReleaseActor();
         ///

@@ -116,12 +116,16 @@ float Urho3DPhysX::DynamicBody::GetSleepThreshold() const
 
 bool Urho3DPhysX::DynamicBody::IsSleeping() const
 {
+    if (!pxScene_)
+        return true;
     PxRigidDynamic* rigidDynamic = actor_->is<PxRigidDynamic>();
     return rigidDynamic ? rigidDynamic->isSleeping() : true;
 }
 
 void Urho3DPhysX::DynamicBody::WakeUp()
 {
+    if (!pxScene_)
+        return;
     PxRigidDynamic* rigidDynamic = actor_->is<PxRigidDynamic>();
     if(rigidDynamic)
         rigidDynamic->wakeUp();
@@ -129,6 +133,8 @@ void Urho3DPhysX::DynamicBody::WakeUp()
 
 void Urho3DPhysX::DynamicBody::PutToSleep()
 {
+    if (!pxScene_)
+        return;
     PxRigidDynamic* rigidDynamic = actor_->is<PxRigidDynamic>();
     if (rigidDynamic)
         rigidDynamic->putToSleep();
