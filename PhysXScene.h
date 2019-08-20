@@ -104,7 +104,10 @@ namespace Urho3DPhysX
         int GetMaxSubsteps() const { return maxSubsteps_; }
         ///
         bool IsSimulating() const { return isSimulating_; }
-
+        ///
+        void SetProcessSimulationEvents(bool process);
+        ///
+        bool IsProcessingSimulationEvents() const { return processSimEvents_; }
     private:
         void HandleSceneSubsystemUpdate(StringHash eventType, VariantMap& eventData);
         void OnSceneSet(Scene* scene) override;
@@ -132,6 +135,7 @@ namespace Urho3DPhysX
         int maxSubsteps_;
         float timeAcc_;
         Vector3 gravity_;
+        bool processSimEvents_;
         Vector<CollisionData> collisions_;
         Vector<TriggerData> triggers_;
         VariantMap triggersDataMap_;

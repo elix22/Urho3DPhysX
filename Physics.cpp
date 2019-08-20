@@ -29,7 +29,7 @@ cpuDispatcher_(nullptr),
 cudaManager_(nullptr),
 cooking_(nullptr),
 errorCallback_(this),
-defBroadPhaseType_(PxBroadPhaseType::eABP),
+defBroadPhaseType_(PxBroadPhaseType::Enum::eABP),
 defEnableGPUDynamics_(true),
 defUseCCD_(true)/*,
 pvd_(nullptr)*/
@@ -85,7 +85,7 @@ bool Urho3DPhysX::Physics::InitializePhysX()
         return false;
     }
     //PxInitExtensions(*physics_, nullptr);
-    cpuDispatcher_ = PxDefaultCpuDispatcherCreate(GetNumPhysicalCPUs());
+    cpuDispatcher_ = PxDefaultCpuDispatcherCreate(GetNumLogicalCPUs());
     PxCudaContextManagerDesc descr;
     descr.graphicsDevice = GetSubsystem<Graphics>()->GetImpl()->GetDevice();
     cudaManager_ = PxCreateCudaContextManager(*foundation_, descr);

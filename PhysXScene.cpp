@@ -60,7 +60,8 @@ broadPhaseCallback_(this),
 simulationEventCallback_(this),
 debugDrawEnabled_(false),
 maxSubsteps_(0),
-timeAcc_(0.0f)
+timeAcc_(0.0f),
+processSimEvents_(true)
 {
 }
 
@@ -77,6 +78,7 @@ void Urho3DPhysX::PhysXScene::RegisterObject(Context * context)
     URHO3D_ACCESSOR_ATTRIBUTE("Gravity", GetGravity, SetGravity, Vector3, DEF_GRAVITY, AM_DEFAULT);
     URHO3D_ATTRIBUTE("FPS", float, fps_, DEF_FPS, AM_DEFAULT);
     URHO3D_ATTRIBUTE("Max substeps", int, maxSubsteps_, 0, AM_DEFAULT);
+    URHO3D_ACCESSOR_ATTRIBUTE("Sim events enabled", IsProcessingSimulationEvents, SetProcessSimulationEvents, bool, true, AM_DEFAULT);
 }
 
 void Urho3DPhysX::PhysXScene::DrawDebugGeometry(DebugRenderer * debug, bool depthTest)
@@ -323,6 +325,21 @@ void Urho3DPhysX::PhysXScene::AddTriggerEvents(PxTriggerPair* pairs, unsigned nu
     }
 }
 
+void Urho3DPhysX::PhysXScene::SetProcessSimulationEvents(bool process)
+{
+    if (processSimEvents_ != process)
+    {
+        processSimEvents_ = process;
+        if (pxScene_)
+        {
+            if (process)
+                pxScene_->setSimulationEventCallback(&simulationEventCallback_);
+            else
+                pxScene_->setSimulationEventCallback(nullptr);
+        }
+    }
+}
+
 void Urho3DPhysX::PhysXScene::HandleSceneSubsystemUpdate(StringHash eventType, VariantMap & eventData)
 {
     if (!enabled_)
@@ -393,7 +410,8 @@ void Urho3DPhysX::PhysXScene::OnSceneSet(Scene * scene)
         descr.cpuDispatcher = physics->GetCpuDispatcher();
         descr.cudaContextManager = physics->GetCUDAContextManager();
         descr.gravity = ToPxVec3(gravity_);
-        descr.simulationEventCallback = &simulationEventCallback_;
+        if(processSimEvents_)
+            descr.simulationEventCallback = &simulationEventCallback_;
         descr.broadPhaseCallback = &broadPhaseCallback_;
         descr.broadPhaseType = broadPhaseType;
         descr.filterShader = physxSceneFilterShader;
