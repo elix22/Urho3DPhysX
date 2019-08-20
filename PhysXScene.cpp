@@ -66,8 +66,7 @@ timeAcc_(0.0f)
 
 Urho3DPhysX::PhysXScene::~PhysXScene()
 {
-    //ReleaseScene();
-    pxScene_->release();
+    ReleaseScene();
 }
 
 void Urho3DPhysX::PhysXScene::RegisterObject(Context * context)
@@ -280,8 +279,6 @@ void Urho3DPhysX::PhysXScene::RemoveActor(RigidActor * actor)
 {
     if (actor && pxScene_)
     {
-        for (auto* a : rigidActors_)
-            a->RemoveFromScene();
         pxScene_->removeActor(*actor->GetActor());
         rigidActors_.Remove(actor);
     }
@@ -536,6 +533,8 @@ void Urho3DPhysX::PhysXScene::ReleaseScene()
 {
     if (pxScene_)
     {
+        for (auto* a : rigidActors_)
+            a->RemoveFromScene();
         UnsubscribeFromEvent(E_SCENESUBSYSTEMUPDATE);
         
         pxScene_->release();

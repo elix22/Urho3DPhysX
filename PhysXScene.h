@@ -68,7 +68,7 @@ namespace Urho3DPhysX
         void Update(float timeStep);
         ///
         void AddActor(RigidActor* actor);
-        ///
+        ///Remove actor from scene, this will NOT reset scene pointer in actor - use RigidActor::RemoveFromScene instead.
         void RemoveActor(RigidActor* actor);
         ///
         bool Raycast(PODVector<PhysXRaycastResult>& results, const Ray& ray, float maxDistance, unsigned mask);
@@ -138,6 +138,5 @@ namespace Urho3DPhysX
         VariantMap collisionDataMap_;
         bool debugDrawEnabled_;
         PODVector<RigidActor*> rigidActors_;
-        PODVector<Joint*> joints_;
     };
 }
