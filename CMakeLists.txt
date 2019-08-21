@@ -20,6 +20,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 include (UrhoCommon)
 # Define target name
 set (TARGET_NAME Urho3DPhysX)
+set(TARGET_PROPERTIES DEBUG_POSTFIX _d)
 # Define source files
 define_source_files (GLOB_CPP_PATTERNS *.cpp GLOB_H_PATTERNS *.h)
 
