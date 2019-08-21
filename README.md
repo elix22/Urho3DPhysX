@@ -7,9 +7,8 @@ Download and [build Urho3D engine](https://urho3d.github.io/documentation/HEAD/_
 
 Build PhysX 4.1 SDK following these steps (*instructions only for Windows, 64bit and Visual Studio 2017, users of different operating systems will have to adjust these steps according to the system they're using*):
 1. Download PhysX 4.1 SDK.
-
-2. Find "(physx SDK root)\physx\source\compiler\cmake\windows\CMakeLists.txt" and add "SET(CMAKE_DEBUG_POSTFIX _d)" at the beginning of the file to make PhysX libraries naming compatible with Urho's naming.
-3. Go to  "(Physx SDK root)\physx\buildtools\presets\public\vc15win64.xml" and set "NV_USE_STATIC_WINCRT" to "False". 
+2. Go to  "(Physx SDK root)\physx\buildtools\presets\public\vc15win64.xml" and set "NV_USE_STATIC_WINCRT" to "False".
+3. In the same file add: \<cmakeSwitch name="NV_APPEND_CONFIG_NAME" value="True" comment="Append config " />
 4. Follow instructions from [here](https://github.com/NVIDIAGameWorks/PhysX) to build PhysX.
 
 To build whole project (addon as library, samples application and modified Urho3DPlayer application) copy 'bin/Data' and 'bin/CoreData' folders from Urho3D directory into 'bin' directory and proceed as ususal when [using Urho3D library](https://urho3d.github.io/documentation/HEAD/_using_library.html). *(Or just copy source files to Your project.)*
