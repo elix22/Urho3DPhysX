@@ -18,7 +18,7 @@
 #include <Urho3D/Graphics/VertexBuffer.h>
 #include <Urho3D/Graphics/IndexBuffer.h>
 #include <Urho3D/Graphics/Graphics.h>
-#include <Urho3D/Graphics/Direct3D11/D3D11GraphicsImpl.h>
+#include <Urho3D/Graphics/GraphicsImpl.h>
 #include <Urho3D/Core/ProcessUtils.h>
 #include <pvd/PxPvd.h>
 
@@ -87,7 +87,11 @@ bool Urho3DPhysX::Physics::InitializePhysX()
     //PxInitExtensions(*physics_, nullptr);
     cpuDispatcher_ = PxDefaultCpuDispatcherCreate(GetNumLogicalCPUs());
     PxCudaContextManagerDesc descr;
+#ifdef URHO3D_OPENGL
+    descr.graphicsDevice = GetSubsystem<Graphics>()->GetImpl()->GetGLContext();
+#else
     descr.graphicsDevice = GetSubsystem<Graphics>()->GetImpl()->GetDevice();
+#endif
     cudaManager_ = PxCreateCudaContextManager(*foundation_, descr);
     //initialize cooking
     PxCookingParams cookingParams(scale);
