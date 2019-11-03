@@ -35,6 +35,10 @@ namespace Urho3DPhysX
                 | PxPairFlag::eTRIGGER_DEFAULT  //notify contact start and end
                 | PxPairFlag::eNOTIFY_TOUCH_PERSISTS
                 | PxPairFlag::eMODIFY_CONTACTS; //for later use (impl modify contact callback)
+            if(PxFilterObjectIsKinematic(attributes0) && PxFilterObjectIsKinematic(attributes1))
+            {
+                pairFlags &= ~PxPairFlag::eSOLVE_CONTACT;
+            }
         }
         else
         {
@@ -418,6 +422,7 @@ void Urho3DPhysX::PhysXScene::OnSceneSet(Scene * scene)
 
         //flags
         descr.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
+        descr.flags |= PxSceneFlag::eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS;
         if(useCCD)
             descr.flags |= PxSceneFlag::eENABLE_CCD;
         if(useGPUDynamics)
@@ -440,13 +445,16 @@ void Urho3DPhysX::PhysXScene::ProcessTriggers()
         for (auto& data : triggers_)
         {
             triggersDataMap_[P_PHYSX_SCENE] = this;
-            WeakPtr<CollisionShape> shape = data.trigger_;
-            triggersDataMap_[P_SHAPE] = shape;
+            WeakPtr<CollisionShape> triggerShape = data.trigger_;
+            triggersDataMap_[P_SHAPE] = triggerShape;
             triggersDataMap_[P_ACTOR] = data.triggerActor_;
-            triggersDataMap_[P_OTHERSHAPE] = data.otherShape_;
+            WeakPtr<CollisionShape> otherShape = data.otherShape_;
+            triggersDataMap_[P_OTHERSHAPE] = otherShape;
             triggersDataMap_[P_OTHERACTOR] = data.otherActor_;
-            if (shape)
-                shape->SendEvent(data.eventType_, triggersDataMap_);
+            if (triggerShape)
+                triggerShape->SendEvent(data.eventType_, triggersDataMap_);
+            /*if (otherShape)
+                otherShape->SendEvent(data.eventType_, triggersDataMap_);*/
             else
                 SendEvent(data.eventType_, triggersDataMap_);
         }
