@@ -260,6 +260,11 @@ void Urho3DPhysX::CollisionShape::UpdateShape()
                 SetMaterial(material_);
                 UpdateShapePose();
                 shape_->userData = this;
+                if (trigger_)
+                {
+                    shape_->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+                    shape_->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+                }
                 RigidActor* actor = node_->GetDerivedComponent<RigidActor>();
                 if (actor)
                     actor->AttachShape(this);
