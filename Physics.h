@@ -14,7 +14,7 @@ namespace Urho3DPhysX
 {
     class PhysXMaterial;
 
-    class __declspec(dllexport) Physics : public Object
+    class URHOPX_API Physics : public Object
     {
         URHO3D_OBJECT(Physics, Object);
 
@@ -87,8 +87,9 @@ namespace Urho3DPhysX
         bool defUseCCD_;
 
         ///visual debugger
-        //PxPvd* pvd_;
+        PxPvdTransport* pvdTransport_;
+        PxPvd* pvd_;
     };
     ///Register Physx objects
-    void __declspec(dllexport) RegisterPhysXLibrary(Context* context);
+    void URHOPX_API RegisterPhysXLibrary(Context* context);
 }

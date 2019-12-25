@@ -16,7 +16,7 @@ To build whole project (addon as library, samples application and modified Urho3
 Currently there's no script for automatic linking, so PhysX must be linked manually:
 
 1. Add include directories: "(PhysX SDK root)\physx\include" and "(PhysX SDK root)\pxshared\include";
-2. Link libraries: PhysX; PhysXCommon; PhysXCooking; PhysXFoundation; PhysXExtensions and copy proper .dll files (for both release and debug) to the executable directory;
+2. Link libraries: PhysX; PhysXCommon; PhysXCooking; PhysXFoundation; PhysXExtensions; PhysXPvdSDK_staticDEBUG_64.lib (not needed in release) and copy proper .dll files (for both release and debug) to the executable directory;
 3. To be able to use GPU acceleration copy also "PhysXGpu_64.dll" and "PhysXDevice64.dll"
 
 ### Using Addon

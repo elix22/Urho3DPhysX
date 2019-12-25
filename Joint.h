@@ -1,4 +1,5 @@
 #pragma once
+#include "PhysXUtils.h"
 #include <Urho3D/Scene/Component.h>
 #include <extensions/PxJoint.h>
 
@@ -10,7 +11,7 @@ namespace Urho3DPhysX
 
     class RigidActor;
 
-    class __declspec(dllexport) Joint : public Component
+    class URHOPX_API Joint : public Component
     {
         URHO3D_OBJECT(Joint, Component);
     public:

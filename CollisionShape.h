@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PhysXUtils.h"
 #include <Urho3D/Scene/Component.h>
 #include <PxShape.h>
 
@@ -16,7 +17,7 @@ namespace Urho3DPhysX
     class RigidActor;
     class PhysXMaterial;
 
-    enum __declspec(dllexport) PhysXShapeType
+    enum URHOPX_API PhysXShapeType
     {
         BOX_SHAPE = 0,
         SPHERE_SHAPE,
@@ -26,7 +27,7 @@ namespace Urho3DPhysX
         TRIANGLEMESH_SHAPE
     };
 
-    class __declspec(dllexport) CollisionShape : public Component
+    class URHOPX_API CollisionShape : public Component
     {
         URHO3D_OBJECT(CollisionShape, Component);
         friend class RigidActor;

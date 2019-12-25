@@ -3,7 +3,7 @@
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport) DynamicBody : public RigidBody
+    class URHOPX_API DynamicBody : public RigidBody
     {
         URHO3D_OBJECT(DynamicBody, RigidBody);
 

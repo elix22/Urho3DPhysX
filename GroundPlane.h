@@ -1,5 +1,5 @@
 #pragma once
-
+#include "PhysXUtils.h"
 #include <Urho3D/Scene/Component.h>
 
 using namespace Urho3D;
@@ -9,7 +9,7 @@ namespace Urho3DPhysX
     class StaticBody;
     class CollisionShape;
 
-    class __declspec(dllexport) GroundPlane : public Component
+    class URHOPX_API GroundPlane : public Component
     {
         URHO3D_OBJECT(GroundPlane, Component);
 

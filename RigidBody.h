@@ -5,7 +5,7 @@
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport)RigidBody : public RigidActor
+    class URHOPX_API RigidBody : public RigidActor
     {
         URHO3D_OBJECT(RigidBody, RigidActor);
 

@@ -1,7 +1,6 @@
 #include "RevoluteJoint.h"
 #include "RigidActor.h"
 #include "Physics.h"
-#include "PhysXUtils.h"
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Core/Context.h>
 #include <extensions/PxRevoluteJoint.h>

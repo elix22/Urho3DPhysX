@@ -1,4 +1,5 @@
 #pragma once
+#include "PhysXUtils.h"
 #include <Urho3D/Core/Object.h>
 #include <foundation/PxErrorCallback.h>
 #include <PxSimulationEventCallback.h>

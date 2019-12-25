@@ -3,7 +3,7 @@
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport) SphericalJoint : public Joint
+    class URHOPX_API SphericalJoint : public Joint
     {
         URHO3D_OBJECT(SphericalJoint, Joint);
 

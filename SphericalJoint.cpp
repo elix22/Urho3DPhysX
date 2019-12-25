@@ -1,5 +1,4 @@
 #include "SphericalJoint.h"
-#include "PhysXUtils.h"
 #include "RigidActor.h"
 #include "Physics.h"
 #include <Urho3D/Core/Context.h>

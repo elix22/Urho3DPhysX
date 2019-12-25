@@ -2,7 +2,6 @@
 #include "RigidActor.h"
 #include "RigidBody.h"
 #include "Physics.h"
-#include "PhysXUtils.h"
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/Profiler.h>

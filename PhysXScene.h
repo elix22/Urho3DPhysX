@@ -44,7 +44,7 @@ namespace Urho3DPhysX
         StringHash eventType_;
     };
 
-    struct __declspec(dllexport) PhysXRaycastResult
+    struct URHOPX_API PhysXRaycastResult
     {
         RigidActor* actor_;
         CollisionShape* shape_;
@@ -53,7 +53,7 @@ namespace Urho3DPhysX
         float distance_;
     };
 
-    class __declspec(dllexport) PhysXScene : public Component
+    class URHOPX_API PhysXScene : public Component
     {
         URHO3D_OBJECT(PhysXScene, Component);
         friend class SimulationEventCallback;

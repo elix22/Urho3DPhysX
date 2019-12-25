@@ -1,6 +1,5 @@
 #include "DynamicBody.h"
 #include "Physics.h"
-#include "PhysXUtils.h"
 #include "Joint.h"
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Core/Context.h>

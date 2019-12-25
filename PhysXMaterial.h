@@ -1,4 +1,5 @@
 #pragma once
+#include "PhysXUtils.h"
 #include <PxMaterial.h>
 #include <Urho3D/Resource/Resource.h>
 
@@ -11,7 +12,7 @@ using namespace physx;
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport) PhysXMaterial : public Resource
+    class URHOPX_API PhysXMaterial : public Resource
     {
         URHO3D_OBJECT(PhysXMaterial, Resource);
 

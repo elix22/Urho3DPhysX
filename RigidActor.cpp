@@ -1,6 +1,5 @@
 #include "RigidActor.h"
 #include "PhysXScene.h"
-#include "PhysXUtils.h"
 #include "CollisionShape.h"
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Scene/Scene.h>

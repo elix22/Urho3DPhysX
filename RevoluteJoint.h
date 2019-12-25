@@ -3,7 +3,7 @@
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport) RevoluteJoint : public Joint
+    class URHOPX_API RevoluteJoint : public Joint
     {
         URHO3D_OBJECT(RevoluteJoint, Joint);
 

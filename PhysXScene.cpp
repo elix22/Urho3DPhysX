@@ -1,7 +1,6 @@
 #include "PhysXScene.h"
 #include "Physics.h"
 #include "RigidActor.h"
-#include "PhysXUtils.h"
 #include "DynamicBody.h"
 #include "CollisionShape.h"
 #include <Urho3D/Core/Context.h>
@@ -355,6 +354,12 @@ void Urho3DPhysX::PhysXScene::OnSceneSet(Scene * scene)
 {
     if (scene)
     {
+        PhysXScene* otherScene = scene->GetComponent<PhysXScene>();
+        if (otherScene && otherScene != this)
+        {
+            URHO3D_LOGERROR("Second physx scene detected.");
+            __debugbreak();
+        }
         PxBroadPhaseType::Enum broadPhaseType;
         Variant bptVar = scene->GetVar("BPT");
         if (bptVar.IsEmpty())
@@ -559,10 +564,11 @@ void Urho3DPhysX::PhysXScene::ReleaseScene()
 {
     if (pxScene_)
     {
+        UnsubscribeFromEvent(E_SCENESUBSYSTEMUPDATE);
+        collisions_.Clear();
+        triggers_.Clear();
         for (auto* a : rigidActors_)
             a->RemoveFromScene();
-        UnsubscribeFromEvent(E_SCENESUBSYSTEMUPDATE);
-        
         pxScene_->release();
         pxScene_ = nullptr;
     }

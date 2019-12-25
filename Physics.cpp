@@ -31,8 +31,9 @@ cooking_(nullptr),
 errorCallback_(this),
 defBroadPhaseType_(PxBroadPhaseType::Enum::eABP),
 defEnableGPUDynamics_(true),
-defUseCCD_(true)/*,
-pvd_(nullptr)*/
+defUseCCD_(true),
+pvdTransport_(nullptr),
+pvd_(nullptr)
 {
 }
 
@@ -54,16 +55,17 @@ Urho3DPhysX::Physics::~Physics()
     }
     if (defaultMaterial_)
         defaultMaterial_.Reset();
-    //GetSubsystem<ResourceCache>()->ReleaseResources(PhysXMaterial::GetTypeStatic(), true); crash here
-    //PxCloseExtensions();
-    /*if (pvd_)
-        pvd_->release();*/
     if (cooking_)
         cooking_->release();
     if (physics_)
         physics_->release();
     if (foundation_)
         foundation_->release();
+    if (pvd_)
+        pvd_->release();
+    if (pvdTransport_)
+        pvdTransport_->release();
+    PxCloseExtensions();
 }
 
 bool Urho3DPhysX::Physics::InitializePhysX()
@@ -74,17 +76,17 @@ bool Urho3DPhysX::Physics::InitializePhysX()
         URHO3D_LOGERROR("Failed to create PxFoundation.");
         return false;
     }
-    /*pvd_ = PxCreatePvd(*foundation_);
-    PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-    pvd_->connect(*transport, PxPvdInstrumentationFlag::eALL);*/
+    pvd_ = PxCreatePvd(*foundation_);
+    pvdTransport_ = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+    pvd_->connect(*pvdTransport_, PxPvdInstrumentationFlag::eALL);
     PxTolerancesScale scale;
-    physics_ = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation_, scale, false);//, pvd_);
+    physics_ = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation_, scale, false, pvd_);
     if (!physics_)
     {
         URHO3D_LOGERROR("Failed to create PxPhysics.");
         return false;
     }
-    //PxInitExtensions(*physics_, nullptr);
+    PxInitExtensions(*physics_, pvd_);
     cpuDispatcher_ = PxDefaultCpuDispatcherCreate(GetNumLogicalCPUs());
     PxCudaContextManagerDesc descr;
 #ifdef URHO3D_OPENGL

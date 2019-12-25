@@ -3,7 +3,7 @@
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport) DistanceJoint : public Joint
+    class URHOPX_API DistanceJoint : public Joint
     {
         URHO3D_OBJECT(DistanceJoint, Joint);
 

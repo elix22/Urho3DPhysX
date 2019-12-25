@@ -3,7 +3,7 @@
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport) PrismaticJoint : public Joint
+    class URHOPX_API PrismaticJoint : public Joint
     {
         URHO3D_OBJECT(PrismaticJoint, Joint);
 
