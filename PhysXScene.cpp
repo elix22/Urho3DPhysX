@@ -562,6 +562,7 @@ bool Urho3DPhysX::PhysXScene::SweepSingle(PhysXRaycastResult & result, const Ray
 
 void Urho3DPhysX::PhysXScene::ReleaseScene()
 {
+    //may lead to assertion failure in pxScene->realease() when using GPU dynamics!
     if (pxScene_)
     {
         UnsubscribeFromEvent(E_SCENESUBSYSTEMUPDATE);

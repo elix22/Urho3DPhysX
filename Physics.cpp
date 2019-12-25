@@ -30,7 +30,11 @@ cudaManager_(nullptr),
 cooking_(nullptr),
 errorCallback_(this),
 defBroadPhaseType_(PxBroadPhaseType::Enum::eABP),
+#ifdef _DEBUG
+defEnableGPUDynamics_(false),
+#else
 defEnableGPUDynamics_(true),
+#endif
 defUseCCD_(true),
 pvdTransport_(nullptr),
 pvd_(nullptr)
