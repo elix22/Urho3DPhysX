@@ -1,6 +1,5 @@
 #include "DynamicBody.h"
 #include "Physics.h"
-#include "PhysXUtils.h"
 #include "Joint.h"
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Core/Context.h>
@@ -116,7 +115,7 @@ float Urho3DPhysX::DynamicBody::GetSleepThreshold() const
 
 bool Urho3DPhysX::DynamicBody::IsSleeping() const
 {
-    if (!pxScene_)
+    if (!pxScene_ || kinematic_)
         return true;
     PxRigidDynamic* rigidDynamic = actor_->is<PxRigidDynamic>();
     return rigidDynamic ? rigidDynamic->isSleeping() : true;
@@ -124,7 +123,7 @@ bool Urho3DPhysX::DynamicBody::IsSleeping() const
 
 void Urho3DPhysX::DynamicBody::WakeUp()
 {
-    if (!pxScene_)
+    if (!pxScene_ || kinematic_)
         return;
     PxRigidDynamic* rigidDynamic = actor_->is<PxRigidDynamic>();
     if(rigidDynamic)
@@ -133,7 +132,7 @@ void Urho3DPhysX::DynamicBody::WakeUp()
 
 void Urho3DPhysX::DynamicBody::PutToSleep()
 {
-    if (!pxScene_)
+    if (!pxScene_ || kinematic_)
         return;
     PxRigidDynamic* rigidDynamic = actor_->is<PxRigidDynamic>();
     if (rigidDynamic)
@@ -296,7 +295,7 @@ bool Urho3DPhysX::DynamicBody::GetKinematicTarget(Vector3 & position, Quaternion
 void Urho3DPhysX::DynamicBody::OnMarkedDirty(Node * node)
 {
     RigidBody::OnMarkedDirty(node);
-    if(IsSleeping())
+    if(IsSleeping() && !kinematic_)
         WakeUp();
 }
 

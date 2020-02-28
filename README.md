@@ -1,5 +1,5 @@
 # Urho3DPhysX
-## [Nvidia PhysX](https://github.com/NVIDIAGameWorks/PhysX) addon for [Urho3D](https://urho3d.github.io/) engine.<br/>
+## [PhysX](https://github.com/NVIDIAGameWorks/PhysX) addon for [Urho3D](https://urho3d.github.io/) engine.<br/>
 *Work in progess- WARNING: This addon is under development and may not be production ready, at the current state basic functionality is provided, but there may be some serious issues.* <br/>
 
 ### Setup
@@ -7,9 +7,8 @@ Download and [build Urho3D engine](https://urho3d.github.io/documentation/HEAD/_
 
 Build PhysX 4.1 SDK following these steps (*instructions only for Windows, 64bit and Visual Studio 2017, users of different operating systems will have to adjust these steps according to the system they're using*):
 1. Download PhysX 4.1 SDK.
-
-2. Find "(physx SDK root)\physx\source\compiler\cmake\windows\CMakeLists.txt" and add "SET(CMAKE_DEBUG_POSTFIX _d)" at the beginning of the file to make PhysX libraries naming compatible with Urho's naming.
-3. Go to  "(Physx SDK root)\physx\buildtools\presets\public\vc15win64.xml" and set "NV_USE_STATIC_WINCRT" to "False". 
+2. Go to  "(Physx SDK root)\physx\buildtools\presets\public\vc15win64.xml" and set "NV_USE_STATIC_WINCRT" to "False".
+3. In the same file add: \<cmakeSwitch name="NV_APPEND_CONFIG_NAME" value="True" comment="Append config " />
 4. Follow instructions from [here](https://github.com/NVIDIAGameWorks/PhysX) to build PhysX.
 
 To build whole project (addon as library, samples application and modified Urho3DPlayer application) copy 'bin/Data' and 'bin/CoreData' folders from Urho3D directory into 'bin' directory and proceed as ususal when [using Urho3D library](https://urho3d.github.io/documentation/HEAD/_using_library.html). *(Or just copy source files to Your project.)*
@@ -17,7 +16,7 @@ To build whole project (addon as library, samples application and modified Urho3
 Currently there's no script for automatic linking, so PhysX must be linked manually:
 
 1. Add include directories: "(PhysX SDK root)\physx\include" and "(PhysX SDK root)\pxshared\include";
-2. Link libraries: PhysX; PhysXCommon; PhysXCooking; PhysXFoundation; PhysXExtensions and copy proper .dll files (for both release and debug) to the executable directory;
+2. Link libraries: PhysX; PhysXCommon; PhysXCooking; PhysXFoundation; PhysXExtensions; PhysXPvdSDK_staticDEBUG_64.lib (not needed in release) and copy proper .dll files (for both release and debug) to the executable directory;
 3. To be able to use GPU acceleration copy also "PhysXGpu_64.dll" and "PhysXDevice64.dll"
 
 ### Using Addon

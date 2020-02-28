@@ -13,6 +13,14 @@
 using namespace Urho3D;
 using namespace physx;
 
+#ifndef URHOPX_API
+    #ifdef Urho3DPhysX_EXPORTS
+        #define URHOPX_API __declspec(dllexport)
+    #else
+        #define URHOPX_API __declspec(dllimport)
+#endif // Urho3DPhysX_EXPORTS
+
+#endif
 namespace Urho3DPhysX
 {
     inline PxVec3 ToPxVec3(const Vector3& vector)

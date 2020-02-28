@@ -3,7 +3,7 @@
 
 namespace Urho3DPhysX
 {
-    class __declspec(dllexport) FixedJoint : public Joint
+    class URHOPX_API FixedJoint : public Joint
     {
         URHO3D_OBJECT(FixedJoint, Joint);
 

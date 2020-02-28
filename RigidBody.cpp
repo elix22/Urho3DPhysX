@@ -1,5 +1,4 @@
 #include "RigidBody.h"
-#include "PhysXUtils.h"
 #include "CollisionShape.h"
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/IO/Log.h>

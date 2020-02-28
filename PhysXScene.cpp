@@ -1,7 +1,6 @@
 #include "PhysXScene.h"
 #include "Physics.h"
 #include "RigidActor.h"
-#include "PhysXUtils.h"
 #include "DynamicBody.h"
 #include "CollisionShape.h"
 #include <Urho3D/Core/Context.h>
@@ -35,6 +34,10 @@ namespace Urho3DPhysX
                 | PxPairFlag::eTRIGGER_DEFAULT  //notify contact start and end
                 | PxPairFlag::eNOTIFY_TOUCH_PERSISTS
                 | PxPairFlag::eMODIFY_CONTACTS; //for later use (impl modify contact callback)
+            if(PxFilterObjectIsKinematic(attributes0) && PxFilterObjectIsKinematic(attributes1))
+            {
+                pairFlags &= ~PxPairFlag::eSOLVE_CONTACT;
+            }
         }
         else
         {
@@ -351,6 +354,12 @@ void Urho3DPhysX::PhysXScene::OnSceneSet(Scene * scene)
 {
     if (scene)
     {
+        PhysXScene* otherScene = scene->GetComponent<PhysXScene>();
+        if (otherScene && otherScene != this)
+        {
+            URHO3D_LOGERROR("Second physx scene detected.");
+            __debugbreak();
+        }
         PxBroadPhaseType::Enum broadPhaseType;
         Variant bptVar = scene->GetVar("BPT");
         if (bptVar.IsEmpty())
@@ -418,6 +427,7 @@ void Urho3DPhysX::PhysXScene::OnSceneSet(Scene * scene)
 
         //flags
         descr.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
+        descr.flags |= PxSceneFlag::eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS;
         if(useCCD)
             descr.flags |= PxSceneFlag::eENABLE_CCD;
         if(useGPUDynamics)
@@ -440,13 +450,16 @@ void Urho3DPhysX::PhysXScene::ProcessTriggers()
         for (auto& data : triggers_)
         {
             triggersDataMap_[P_PHYSX_SCENE] = this;
-            WeakPtr<CollisionShape> shape = data.trigger_;
-            triggersDataMap_[P_SHAPE] = shape;
+            WeakPtr<CollisionShape> triggerShape = data.trigger_;
+            triggersDataMap_[P_SHAPE] = triggerShape;
             triggersDataMap_[P_ACTOR] = data.triggerActor_;
-            triggersDataMap_[P_OTHERSHAPE] = data.otherShape_;
+            WeakPtr<CollisionShape> otherShape = data.otherShape_;
+            triggersDataMap_[P_OTHERSHAPE] = otherShape;
             triggersDataMap_[P_OTHERACTOR] = data.otherActor_;
-            if (shape)
-                shape->SendEvent(data.eventType_, triggersDataMap_);
+            if (triggerShape)
+                triggerShape->SendEvent(data.eventType_, triggersDataMap_);
+            /*if (otherShape)
+                otherShape->SendEvent(data.eventType_, triggersDataMap_);*/
             else
                 SendEvent(data.eventType_, triggersDataMap_);
         }
@@ -549,12 +562,14 @@ bool Urho3DPhysX::PhysXScene::SweepSingle(PhysXRaycastResult & result, const Ray
 
 void Urho3DPhysX::PhysXScene::ReleaseScene()
 {
+    //may lead to assertion failure in pxScene->realease() when using GPU dynamics!
     if (pxScene_)
     {
+        UnsubscribeFromEvent(E_SCENESUBSYSTEMUPDATE);
+        collisions_.Clear();
+        triggers_.Clear();
         for (auto* a : rigidActors_)
             a->RemoveFromScene();
-        UnsubscribeFromEvent(E_SCENESUBSYSTEMUPDATE);
-        
         pxScene_->release();
         pxScene_ = nullptr;
     }

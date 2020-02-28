@@ -1,5 +1,5 @@
 #pragma once
-
+#include "PhysXUtils.h"
 #include <Urho3D/Scene/Component.h>
 #include <PxRigidActor.h>
 
@@ -12,7 +12,7 @@ namespace Urho3DPhysX
     class CollisionShape;
     class Joint;
 
-    class __declspec(dllexport) RigidActor : public Component
+    class URHOPX_API RigidActor : public Component
     {
         URHO3D_OBJECT(RigidActor, Component);
         friend class Joint;

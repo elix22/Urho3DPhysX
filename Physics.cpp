@@ -18,7 +18,7 @@
 #include <Urho3D/Graphics/VertexBuffer.h>
 #include <Urho3D/Graphics/IndexBuffer.h>
 #include <Urho3D/Graphics/Graphics.h>
-#include <Urho3D/Graphics/Direct3D11/D3D11GraphicsImpl.h>
+#include <Urho3D/Graphics/GraphicsImpl.h>
 #include <Urho3D/Core/ProcessUtils.h>
 #include <pvd/PxPvd.h>
 
@@ -30,9 +30,14 @@ cudaManager_(nullptr),
 cooking_(nullptr),
 errorCallback_(this),
 defBroadPhaseType_(PxBroadPhaseType::Enum::eABP),
+#ifdef _DEBUG
+defEnableGPUDynamics_(false),
+#else
 defEnableGPUDynamics_(true),
-defUseCCD_(true)/*,
-pvd_(nullptr)*/
+#endif
+defUseCCD_(true),
+pvdTransport_(nullptr),
+pvd_(nullptr)
 {
 }
 
@@ -54,16 +59,17 @@ Urho3DPhysX::Physics::~Physics()
     }
     if (defaultMaterial_)
         defaultMaterial_.Reset();
-    //GetSubsystem<ResourceCache>()->ReleaseResources(PhysXMaterial::GetTypeStatic(), true); crash here
-    //PxCloseExtensions();
-    /*if (pvd_)
-        pvd_->release();*/
     if (cooking_)
         cooking_->release();
     if (physics_)
         physics_->release();
     if (foundation_)
         foundation_->release();
+    if (pvd_)
+        pvd_->release();
+    if (pvdTransport_)
+        pvdTransport_->release();
+    PxCloseExtensions();
 }
 
 bool Urho3DPhysX::Physics::InitializePhysX()
@@ -74,20 +80,24 @@ bool Urho3DPhysX::Physics::InitializePhysX()
         URHO3D_LOGERROR("Failed to create PxFoundation.");
         return false;
     }
-    /*pvd_ = PxCreatePvd(*foundation_);
-    PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-    pvd_->connect(*transport, PxPvdInstrumentationFlag::eALL);*/
+    pvd_ = PxCreatePvd(*foundation_);
+    pvdTransport_ = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+    pvd_->connect(*pvdTransport_, PxPvdInstrumentationFlag::eALL);
     PxTolerancesScale scale;
-    physics_ = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation_, scale, false);//, pvd_);
+    physics_ = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation_, scale, false, pvd_);
     if (!physics_)
     {
         URHO3D_LOGERROR("Failed to create PxPhysics.");
         return false;
     }
-    //PxInitExtensions(*physics_, nullptr);
+    PxInitExtensions(*physics_, pvd_);
     cpuDispatcher_ = PxDefaultCpuDispatcherCreate(GetNumLogicalCPUs());
     PxCudaContextManagerDesc descr;
+#ifdef URHO3D_OPENGL
+    descr.graphicsDevice = GetSubsystem<Graphics>()->GetImpl()->GetGLContext();
+#else
     descr.graphicsDevice = GetSubsystem<Graphics>()->GetImpl()->GetDevice();
+#endif
     cudaManager_ = PxCreateCudaContextManager(*foundation_, descr);
     //initialize cooking
     PxCookingParams cookingParams(scale);
