@@ -1,5 +1,5 @@
 # Urho3DPhysX
-## [Nvidia PhysX](https://github.com/NVIDIAGameWorks/PhysX) addon for [Urho3D](https://urho3d.github.io/) engine.<br/>
+## [PhysX](https://github.com/NVIDIAGameWorks/PhysX) addon for [Urho3D](https://urho3d.github.io/) engine.<br/>
 *Work in progess- WARNING: This addon is under development and may not be production ready, at the current state basic functionality is provided, but there may be some serious issues.* <br/>
 
 ### Setup
