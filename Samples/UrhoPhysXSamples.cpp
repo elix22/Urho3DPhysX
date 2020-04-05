@@ -5,7 +5,6 @@
 #include "RaycastSample.h"
 #include "MaterialsSample.h"
 #include "StressTest.h"
-#include "ControllerSample.h"
 #include <Physics.h>
 #include <Urho3D/Engine/EngineDefs.h>
 #include <Urho3D/Resource/XMLFile.h>
@@ -105,10 +104,6 @@ void PhysXSamples::HandleSamplesMenuButton(StringHash eventType, VariantMap & ev
         else if (name == "Sample5")
         {
             currentSample_ = SharedPtr<SampleBase>(new StressTest(context_));
-        }
-        else if (name == "Sample6")
-        {
-            currentSample_ = SharedPtr<SampleBase>(new ControllerSample(context_));
         }
         if (currentSample_)
         {
