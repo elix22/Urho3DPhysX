@@ -9,6 +9,7 @@
 #include <foundation/PxVec4.h>
 #include <foundation/PxQuat.h>
 #include <foundation/PxTransform.h>
+#include <characterkinematic/PxExtended.h>
 
 using namespace Urho3D;
 using namespace physx;
@@ -26,6 +27,11 @@ namespace Urho3DPhysX
     inline PxVec3 ToPxVec3(const Vector3& vector)
     {
         return PxVec3(vector.x_, vector.y_, vector.z_);
+    }
+
+    inline PxExtendedVec3 ToPxExtendedVec3(const Vector3& vector)
+    {
+        return PxExtendedVec3((PxExtended)vector.x_, (PxExtended)vector.y_, (PxExtended)vector.z_);
     }
 
     inline PxQuat ToPxQuat(const Quaternion& quat)
@@ -48,12 +54,17 @@ namespace Urho3DPhysX
         return ToPxTransform(matrix.Translation(), matrix.Rotation());
     }
 
-    inline Vector3 ToVector3(PxVec3 vector)
+    inline Vector3 ToVector3(const PxVec3& vector)
     {
         return Vector3(vector.x, vector.y, vector.z);
     }
 
-    inline Quaternion ToQuaternion(PxQuat quat)
+    inline Vector3 ToVector3(const PxExtendedVec3& vector)
+    {
+        return Vector3((float)vector.x, (float)vector.y, (float)vector.z);
+    }
+
+    inline Quaternion ToQuaternion(const PxQuat& quat)
     {
         return Quaternion(quat.w, quat.x, quat.y, quat.z);
     }

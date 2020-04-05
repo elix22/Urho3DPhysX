@@ -4,6 +4,10 @@
 #include <Urho3D/Math/Ray.h>
 #include <PxScene.h>
 
+namespace physx
+{
+    class PxControllerManager;
+}
 using namespace Urho3D;
 using namespace physx;
 
@@ -19,11 +23,15 @@ namespace Urho3DPhysX
         CollisionData() :
             actorA_(nullptr),
             actorB_(nullptr),
+            controller_(nullptr),
+            isControllerCollision_(false),
             eventType_(E_COLLISION)
         {
         }
         WeakPtr<RigidActor> actorA_;
         WeakPtr<RigidActor> actorB_;
+        WeakPtr<KinematicController> controller_;
+        bool isControllerCollision_;
         StringHash eventType_;
     };
 
@@ -51,6 +59,12 @@ namespace Urho3DPhysX
         Vector3 position_;
         Vector3 normal_;
         float distance_;
+    };
+
+    class URHOPX_API DefCtrlFilterCallback : public PxControllerFilterCallback
+    {
+    public:
+        bool filter(const PxController& a, const PxController& b) override;
     };
 
     class URHOPX_API PhysXScene : public Component
@@ -108,6 +122,15 @@ namespace Urho3DPhysX
         void SetProcessSimulationEvents(bool process);
         ///
         bool IsProcessingSimulationEvents() const { return processSimEvents_; }
+        ///
+        PxControllerManager* GetControllerManager() { return controllerManager_; }
+        ///
+        DefCtrlFilterCallback* GetControllerFilterCallback() { return &controllerFilterCallback_; }
+        ///
+        ControllerHitCallback* GetControllerHitCallback() { return &controllerHitCallback_; }
+        ///
+        float GetFixedStep() const { return fixedStep_; }
+
     private:
         void HandleSceneSubsystemUpdate(StringHash eventType, VariantMap& eventData);
         void OnSceneSet(Scene* scene) override;
@@ -142,5 +165,9 @@ namespace Urho3DPhysX
         VariantMap collisionDataMap_;
         bool debugDrawEnabled_;
         PODVector<RigidActor*> rigidActors_;
+        PxControllerManager* controllerManager_;
+        DefCtrlFilterCallback controllerFilterCallback_;
+        ControllerHitCallback controllerHitCallback_;
+        float fixedStep_;
     };
 }

@@ -11,6 +11,7 @@
 #include "PrismaticJoint.h"
 #include "RevoluteJoint.h"
 #include "GroundPlane.h"
+#include "KinematicController.h"
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Graphics/Model.h>
@@ -294,4 +295,5 @@ void Urho3DPhysX::RegisterPhysXLibrary(Context* context)
     FixedJoint::RegisterObject(context);
     PrismaticJoint::RegisterObject(context);
     RevoluteJoint::RegisterObject(context);
+    KinematicController::RegisterObject(context);
 }
