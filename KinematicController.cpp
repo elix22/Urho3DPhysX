@@ -42,10 +42,10 @@ boxHalfHeight_(DEF_CTRL_BOX_H),
 boxHalfSideExtend_(DEF_CTRL_BOX_SE),
 boxHalfForwardExtend_(DEF_CTRL_BOX_FE),
 recreatingNeeded_(true),
-ignoreNodeDirty_(false),
 nodeFromFoot_(false),
 collisionLayer_(0x1),
-collisionMask_(M_MAX_UNSIGNED)
+collisionMask_(M_MAX_UNSIGNED),
+lastPosition_(Vector3::ZERO)
 {
     filters_.mFilterData = &filterData_;
     material_ = SharedPtr<PhysXMaterial>(GetSubsystem<Physics>()->GetDefaultMaterial());
@@ -461,9 +461,7 @@ void Urho3DPhysX::KinematicController::OnNodeSet(Node* node)
 }
 
 void Urho3DPhysX::KinematicController::OnMarkedDirty(Node* node)
-{    
-    if(ignoreNodeDirty_)
-        return;
+{
     UpdatePositionFromNode();
 }
 
@@ -504,13 +502,11 @@ void Urho3DPhysX::KinematicController::UpdateNodePosition()
 {
     if (controller_)
     {
-        bool ignoreState = ignoreNodeDirty_;
-        ignoreNodeDirty_ = true;
         if (nodeFromFoot_)
             node_->SetWorldPosition(ToVector3(controller_->getFootPosition()));
         else
             node_->SetWorldPosition(ToVector3(controller_->getPosition()) - position_);
-        ignoreNodeDirty_ = ignoreState;
+        lastPosition_ = node_->GetWorldPosition();
     }
 }
 
@@ -518,7 +514,12 @@ void Urho3DPhysX::KinematicController::UpdatePositionFromNode()
 {
     if (node_ && controller_)
     {
-        controller_->setPosition(ToPxExtendedVec3(node_->GetWorldPosition() + position_));
+        Vector3 newPos = node_->GetWorldPosition();
+        if (!newPos.Equals(lastPosition_))
+        {
+            controller_->setPosition(ToPxExtendedVec3(newPos + position_));
+            lastPosition_ = newPos;
+        }
     }
 }
 

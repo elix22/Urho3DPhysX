@@ -131,10 +131,6 @@ namespace Urho3DPhysX
         ///
         void UpdatePositionFromNode();
         ///
-        bool IsIgnoringNodeDirty() const { return ignoreNodeDirty_; }
-        ///
-        void SetIgnoreNodeDirty(bool block) { ignoreNodeDirty_ = block; }
-        ///
         bool NodeFromFoot() const { return nodeFromFoot_; }
         ///
         void UseNodeFromFoot(bool value) { nodeFromFoot_ = value; }
@@ -178,7 +174,6 @@ namespace Urho3DPhysX
         bool nodeFromFoot_;
 
         bool recreatingNeeded_;
-        bool ignoreNodeDirty_;
 
         ControllerNonWalkableMode nonWalkableMode_;
         SharedPtr<PhysXMaterial> material_;
@@ -187,5 +182,7 @@ namespace Urho3DPhysX
         PxFilterData filterData_;
         PxUserControllerHitReport* hitCallback_;
         PxControllerBehaviorCallback* behaviorCallback_;
+
+        Vector3 lastPosition_;
     };
 }
