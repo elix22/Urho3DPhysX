@@ -184,5 +184,6 @@ namespace Urho3DPhysX
         PxControllerBehaviorCallback* behaviorCallback_;
 
         Vector3 lastPosition_;
+        bool isMoving_;
     };
 }

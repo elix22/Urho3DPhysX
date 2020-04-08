@@ -45,7 +45,8 @@ recreatingNeeded_(true),
 nodeFromFoot_(false),
 collisionLayer_(0x1),
 collisionMask_(M_MAX_UNSIGNED),
-lastPosition_(Vector3::ZERO)
+lastPosition_(Vector3::ZERO),
+isMoving_(false)
 {
     filters_.mFilterData = &filterData_;
     material_ = SharedPtr<PhysXMaterial>(GetSubsystem<Physics>()->GetDefaultMaterial());
@@ -169,8 +170,10 @@ unsigned char Urho3DPhysX::KinematicController::Move(const Vector3& displ, float
 {
     if (controller_)
     {
+        isMoving_ = true;
         unsigned flags = controller_->move(ToPxVec3(displ), minDist, timeStep, filters_);
         UpdateNodePosition();
+        isMoving_ = false;
         return flags;
     }
     return 0;
@@ -512,13 +515,15 @@ void Urho3DPhysX::KinematicController::UpdateNodePosition()
 
 void Urho3DPhysX::KinematicController::UpdatePositionFromNode()
 {
+    if (isMoving_)
+        return;
     if (node_ && controller_)
     {
         Vector3 newPos = node_->GetWorldPosition();
         if (!newPos.Equals(lastPosition_))
         {
-            controller_->setPosition(ToPxExtendedVec3(newPos + position_));
             lastPosition_ = newPos;
+            controller_->setPosition(ToPxExtendedVec3(newPos + position_));
         }
     }
 }
