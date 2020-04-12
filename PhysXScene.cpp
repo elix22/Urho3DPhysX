@@ -361,6 +361,15 @@ void Urho3DPhysX::PhysXScene::AddTriggerEvents(PxTriggerPair* pairs, unsigned nu
         data.otherShape_ = otherRemoved ? nullptr : static_cast<CollisionShape*>(pair.otherShape->userData);
         data.otherActor_ = otherRemoved ? nullptr : static_cast<RigidActor*>(pair.otherActor->userData);
         //TODO: check if only shape was removed and actor still exists
+        if (!otherRemoved && !data.otherActor_)
+        {
+            PxShape* shape = pair.otherShape;
+            if (shape && shape->getSimulationFilterData().word2 == 1)
+            {
+                data.isControllerTrigger_ = true;
+                data.controller_ = WeakPtr<KinematicController>(static_cast<KinematicController*>(shape->userData));
+            }
+        }
         if (pair.status & PxPairFlag::eNOTIFY_TOUCH_FOUND)
             data.eventType_ = E_TRIGGERENTER;
         else if (pair.status & PxPairFlag::eNOTIFY_TOUCH_LOST)
@@ -500,6 +509,8 @@ void Urho3DPhysX::PhysXScene::ProcessTriggers()
             WeakPtr<CollisionShape> otherShape = data.otherShape_;
             triggersDataMap_[P_OTHERSHAPE] = otherShape;
             triggersDataMap_[P_OTHERACTOR] = data.otherActor_;
+            triggersDataMap_[P_CONRTOLLERCOLLISION] = data.isControllerTrigger_;
+            triggersDataMap_[P_CONTROLLER] = data.controller_;
             if (triggerShape)
                 triggerShape->SendEvent(data.eventType_, triggersDataMap_);
             /*if (otherShape)

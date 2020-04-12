@@ -41,7 +41,9 @@ namespace Urho3DPhysX
             trigger_(nullptr),
             triggerActor_(nullptr),
             otherShape_(nullptr),
-            otherActor_(nullptr)
+            otherActor_(nullptr),
+            isControllerTrigger_(false),
+            controller_(nullptr)
         {
 
         }
@@ -49,6 +51,8 @@ namespace Urho3DPhysX
         WeakPtr<RigidActor> triggerActor_;
         WeakPtr<CollisionShape> otherShape_;
         WeakPtr<RigidActor> otherActor_;
+        bool isControllerTrigger_;
+        WeakPtr<KinematicController> controller_;
         StringHash eventType_;
     };
 
