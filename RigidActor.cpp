@@ -8,7 +8,9 @@
 
 Urho3DPhysX::RigidActor::RigidActor(Context * context) : Component(context),
 isApplyingTransform_(false),
-pxScene_(nullptr)
+pxScene_(nullptr),
+lastPosition_(Vector3::ZERO),
+lastRotation_(Quaternion::IDENTITY)
 {
 }
 
@@ -73,7 +75,9 @@ void Urho3DPhysX::RigidActor::ApplyWorldTransform(const Vector3 & worldPosition,
     {
         isApplyingTransform_ = true;
         node_->SetWorldPosition(worldPosition);
+        lastPosition_ = worldPosition;
         node_->SetWorldRotation(worldRotation);
+        lastRotation_ = worldRotation;
         isApplyingTransform_ = false;
     }
 }
@@ -87,7 +91,13 @@ void Urho3DPhysX::RigidActor::UpdateTransformFromNode(bool awake)
 {
     if (node_)
     {
-        actor_->setGlobalPose(ToPxTransform(node_->GetWorldTransform()), awake);
+        Vector3 newPos = node_->GetWorldPosition();
+        bool updatePos = !newPos.Equals(lastPosition_);
+        Quaternion newRot = node_->GetWorldRotation();
+        bool updateRot = !newRot.Equals(lastRotation_);
+        actor_->setGlobalPose(ToPxTransform(updatePos ? newPos : lastPosition_, updateRot ? newRot : lastRotation_), awake);
+        lastPosition_ = newPos;
+        lastRotation_ = newRot;
     }
 }
 

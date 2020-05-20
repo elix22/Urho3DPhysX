@@ -4,6 +4,7 @@
 #include <foundation/PxErrorCallback.h>
 #include <PxSimulationEventCallback.h>
 #include <PxBroadPhase.h>
+#include <characterkinematic/PxController.h>
 
 using namespace physx;
 
@@ -15,11 +16,19 @@ URHO3D_EVENT(E_PHYSXERROR, PhysXError)
     URHO3D_PARAM(P_LINE, Line);
 }
 
+URHO3D_EVENT(E_PX_PRESIMULATION, PhysXPreSimulation)
+{
+    URHO3D_PARAM(P_PHYSX_SCENE, PhysXScene);
+    URHO3D_PARAM(P_TIMESTEP, TimeStep);
+}
+
 URHO3D_EVENT(E_COLLISIONSTART, CollisionStart)
 {
     URHO3D_PARAM(P_PHYSX_SCENE, PhysXScene);
     URHO3D_PARAM(P_ACTOR, Actor);
     URHO3D_PARAM(P_OTHERACTOR, OtherActor);
+    URHO3D_PARAM(P_CONTROLLER, Controller);
+    URHO3D_PARAM(P_CONTROLLERCOLLISION, ControllerCollision);
 }
 
 URHO3D_EVENT(E_COLLISION, Collision)
@@ -27,6 +36,8 @@ URHO3D_EVENT(E_COLLISION, Collision)
     URHO3D_PARAM(P_PHYSX_SCENE, PhysXScene);
     URHO3D_PARAM(P_ACTOR, Actor);
     URHO3D_PARAM(P_OTHERACTOR, OtherActor);
+    URHO3D_PARAM(P_CONTROLLER, Controller);
+    URHO3D_PARAM(P_CONTROLLERCOLLISION, ControllerCollision);
 }
 
 URHO3D_EVENT(E_COLLISIONEND, CollisionEnd)
@@ -34,6 +45,8 @@ URHO3D_EVENT(E_COLLISIONEND, CollisionEnd)
     URHO3D_PARAM(P_PHYSX_SCENE, PhysXScene);
     URHO3D_PARAM(P_ACTOR, Actor);
     URHO3D_PARAM(P_OTHERACTOR, OtherActor);
+    URHO3D_PARAM(P_CONTROLLER, Controller);
+    URHO3D_PARAM(P_CONTROLLERCOLLISION, ControllerCollision);
 }
 
 URHO3D_EVENT(E_TRIGGERENTER, TriggerEnter)
@@ -43,6 +56,8 @@ URHO3D_EVENT(E_TRIGGERENTER, TriggerEnter)
     URHO3D_PARAM(P_ACTOR, Actor);
     URHO3D_PARAM(P_OTHERSHAPE, OtherShape);
     URHO3D_PARAM(P_OTHERACTOR, OtherActor);
+    URHO3D_PARAM(P_CONTROLLER, Controller);
+    URHO3D_PARAM(P_CONRTOLLERCOLLISION, ControllerCollision);
 }
 
 URHO3D_EVENT(E_TRIGGERLEAVE, TriggerLeave)
@@ -52,12 +67,38 @@ URHO3D_EVENT(E_TRIGGERLEAVE, TriggerLeave)
     URHO3D_PARAM(P_ACTOR, Actor);
     URHO3D_PARAM(P_OTHERSHAPE, OtherShape);
     URHO3D_PARAM(P_OTHERACTOR, OtherActor);
+    URHO3D_PARAM(P_CONTROLLER, Controller);
+    URHO3D_PARAM(P_CONRTOLLERCOLLISION, ControllerCollision);
+}
+
+URHO3D_EVENT(E_CONTROLLERCOLLISION, ControllerCollision)
+{
+    URHO3D_PARAM(P_PHYSX_SCENE, PhysXScene);
+    URHO3D_PARAM(P_CONTROLLER, Controller);
+    URHO3D_PARAM(P_OTHER_CONTROLLER, OtherController);
+    URHO3D_PARAM(P_POSITION, Position);
+    URHO3D_PARAM(P_NORMAL, Normal);
+    URHO3D_PARAM(P_DIR, Dir);
+    URHO3D_PARAM(P_LENGTH, Length);
+}
+
+URHO3D_EVENT(E_SHAPECOLLISION, ShapeCollision)
+{
+    URHO3D_PARAM(P_PHYSX_SCENE, PhysXScene);
+    URHO3D_PARAM(P_CONTROLLER, Controller);
+    URHO3D_PARAM(P_SHAPE, Shape);
+    URHO3D_PARAM(P_ACTOR, Actor);
+    URHO3D_PARAM(P_POSITION, Position);
+    URHO3D_PARAM(P_NORMAL, Normal);
+    URHO3D_PARAM(P_DIR, Dir);
+    URHO3D_PARAM(P_LENGTH, Length);
 }
 
 namespace Urho3DPhysX
 {
     class Physics;
     class PhysXScene;
+    class KinematicController;
 
     class ErrorCallback : public PxErrorCallback
     {
@@ -99,5 +140,16 @@ namespace Urho3DPhysX
 
     private:
         PhysXScene* scene_;
+    };
+
+    class ControllerHitCallback : public PxUserControllerHitReport
+    {
+    public:
+        ControllerHitCallback();
+        ~ControllerHitCallback();
+
+        void onShapeHit(const PxControllerShapeHit& hit) override;
+        void onControllerHit(const PxControllersHit& hit) override;
+        void onObstacleHit(const PxControllerObstacleHit& hit) override;
     };
 }

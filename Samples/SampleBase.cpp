@@ -3,6 +3,7 @@
 #include <StaticBody.h>
 #include <CollisionShape.h>
 #include <PhysXMaterial.h>
+#include <PhysXEvents.h>
 #include <Urho3D/Graphics/StaticModel.h>
 #include <Urho3D/Graphics/Model.h>
 #include <Urho3D/Scene/Scene.h>
@@ -19,6 +20,7 @@
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/Font.h>
+#include <Urho3D/Scene/SceneEvents.h>
 
 using namespace Urho3DPhysX;
 
@@ -37,7 +39,6 @@ updateEnabled_(true)
     cache_ = GetSubsystem<ResourceCache>();
     CreateInstructions();
     SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(SampleBase, HandleKeyUp));
-    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(SampleBase, HandleUpdate));
     SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(SampleBase, HandleMouseBtnUp));
 }
 
@@ -72,6 +73,8 @@ void SampleBase::CreateScene()
     cameraNode_->LookAt(Vector3::ZERO);
     camera_ = cameraNode_->CreateComponent<Camera>();
     camera_->SetFarClip(300.0f);
+    SubscribeToEvent(scene_, E_SCENEUPDATE, URHO3D_HANDLER(SampleBase, HandleUpdate));
+    SubscribeToEvent(scene_, E_PX_PRESIMULATION, URHO3D_HANDLER(SampleBase, HandleFixedUpdate));
 }
 
 void SampleBase::CreateSceneAndViewport()
@@ -218,6 +221,12 @@ void SampleBase::HandleUpdate(StringHash eventType, VariantMap & eventData)
 {
     if (updateEnabled_)
         Update(eventData[Update::P_TIMESTEP].GetFloat());
+}
+
+void SampleBase::HandleFixedUpdate(StringHash eventType, VariantMap& eventData)
+{
+    using namespace PhysXPreSimulation;
+    FixedUpdate(eventData[PhysXPreSimulation::P_TIMESTEP].GetFloat());
 }
 
 void SampleBase::HandleKeyUp(StringHash eventType, VariantMap & eventData)

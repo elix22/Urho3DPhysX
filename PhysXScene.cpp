@@ -3,6 +3,7 @@
 #include "RigidActor.h"
 #include "DynamicBody.h"
 #include "CollisionShape.h"
+#include "KinematicController.h"
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/Profiler.h>
 #include <Urho3D/Scene/SceneEvents.h>
@@ -10,6 +11,7 @@
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
 #include <Urho3D/IO/Log.h>
+#include <characterkinematic/PxControllerManager.h>
 
 namespace Urho3DPhysX
 {
@@ -27,7 +29,6 @@ namespace Urho3DPhysX
             pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
             return PxFilterFlag::eDEFAULT;
         }
-
         if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
         {
             pairFlags = PxPairFlag::eCONTACT_DEFAULT //default: eSOLVE_CONTACT | eDETECT_DISCRETE_CONTACT
@@ -53,6 +54,17 @@ namespace Urho3DPhysX
     }
 
     static const PxHitFlags DEF_RAYCAST_FLAGS = PxHitFlag::ePOSITION | PxHitFlag::eNORMAL;
+
+    bool DefCtrlFilterCallback::filter(const PxController& a, const PxController& b)
+    {
+        KinematicController* kca = static_cast<KinematicController*>(a.getUserData());
+        KinematicController* kcb = static_cast<KinematicController*>(b.getUserData());
+        if (kca && kcb)
+        {
+            return (kca->GetCollisionLayer() & kcb->GetCollisionMask()) && (kcb->GetCollisionLayer() & kcb->GetCollisionMask());
+        }
+        return false;
+    }
 }
 
 Urho3DPhysX::PhysXScene::PhysXScene(Context * context) : Component(context),
@@ -64,7 +76,10 @@ simulationEventCallback_(this),
 debugDrawEnabled_(false),
 maxSubsteps_(0),
 timeAcc_(0.0f),
-processSimEvents_(true)
+processSimEvents_(true),
+controllerManager_(nullptr),
+isSimulating_(false),
+fixedStep_(0.0f)
 {
 }
 
@@ -131,6 +146,17 @@ void Urho3DPhysX::PhysXScene::Update(float timeStep)
     timeAcc_ += timeStep;
     while (timeAcc_ >= internalTimeStep && maxSubsteps > 0)
     {
+        fixedStep_ = internalTimeStep;
+        //pre simulation event
+        {
+            using namespace PhysXPreSimulation;
+            VariantMap& eventData = GetEventDataMap();
+            eventData[P_PHYSX_SCENE] = this;
+            eventData[P_TIMESTEP] = internalTimeStep;
+            auto* scene = GetScene();
+            if(scene)
+                scene->SendEvent(E_PX_PRESIMULATION, eventData);
+        }
         pxScene_->simulate(internalTimeStep);
         timeAcc_ -= internalTimeStep;
         --maxSubsteps;
@@ -266,6 +292,7 @@ void Urho3DPhysX::PhysXScene::SetDebugDrawEnabled(bool enable)
         pxScene_->setVisualizationParameter(PxVisualizationParameter::eMBP_REGIONS, 1.0f);
         pxScene_->setVisualizationParameter(PxVisualizationParameter::eJOINT_LOCAL_FRAMES, 1.0f);
         pxScene_->setVisualizationParameter(PxVisualizationParameter::eJOINT_LIMITS, 1.0f);
+        pxScene_->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_COMPOUNDS, 1.0f);
     }
 #endif // !_DEBUG
 }
@@ -291,9 +318,23 @@ void Urho3DPhysX::PhysXScene::RemoveActor(RigidActor * actor)
 
 void Urho3DPhysX::PhysXScene::AddCollision(const PxContactPairHeader & pairHeader, const PxContactPair * pairs, PxU32 nbPairs)
 {
-    WeakPtr<RigidActor> a(static_cast<RigidActor*>(pairHeader.actors[0]->userData));
-    WeakPtr<RigidActor> b(static_cast<RigidActor*>(pairHeader.actors[1]->userData));
     CollisionData data;
+    auto setCtrlCollision = [](PxRigidActor* actor, CollisionData& data)
+    {
+        PxShape* shape;
+        actor->getShapes(&shape, 1);
+        if (shape && shape->getSimulationFilterData().word2 == 1)
+        {
+            data.isControllerCollision_ = true;
+            data.controller_ = WeakPtr<KinematicController>(static_cast<KinematicController*>(shape->userData));
+        }
+    };
+    WeakPtr<RigidActor> a(static_cast<RigidActor*>(pairHeader.actors[0]->userData));
+    if (!a)
+        setCtrlCollision(pairHeader.actors[0], data);
+    WeakPtr<RigidActor> b(static_cast<RigidActor*>(pairHeader.actors[1]->userData));
+    if (!b)
+        setCtrlCollision(pairHeader.actors[1], data);
     data.actorA_ = a;
     data.actorB_ = b;
     for (unsigned i = 0; i < nbPairs; ++i)
@@ -320,6 +361,15 @@ void Urho3DPhysX::PhysXScene::AddTriggerEvents(PxTriggerPair* pairs, unsigned nu
         data.otherShape_ = otherRemoved ? nullptr : static_cast<CollisionShape*>(pair.otherShape->userData);
         data.otherActor_ = otherRemoved ? nullptr : static_cast<RigidActor*>(pair.otherActor->userData);
         //TODO: check if only shape was removed and actor still exists
+        if (!otherRemoved && !data.otherActor_)
+        {
+            PxShape* shape = pair.otherShape;
+            if (shape && shape->getSimulationFilterData().word2 == 1)
+            {
+                data.isControllerTrigger_ = true;
+                data.controller_ = WeakPtr<KinematicController>(static_cast<KinematicController*>(shape->userData));
+            }
+        }
         if (pair.status & PxPairFlag::eNOTIFY_TOUCH_FOUND)
             data.eventType_ = E_TRIGGERENTER;
         else if (pair.status & PxPairFlag::eNOTIFY_TOUCH_LOST)
@@ -436,6 +486,9 @@ void Urho3DPhysX::PhysXScene::OnSceneSet(Scene * scene)
         pxScene_ = px->createScene(descr);
         pxScene_->userData = this;
 
+        controllerManager_ = PxCreateControllerManager(*pxScene_);
+        controllerManager_->setOverlapRecoveryModule(true);
+
         SubscribeToEvent(scene, E_SCENESUBSYSTEMUPDATE, URHO3D_HANDLER(PhysXScene, HandleSceneSubsystemUpdate));
         //SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(PhysXScene, HandlePostRenderUpdate));
     }
@@ -456,6 +509,8 @@ void Urho3DPhysX::PhysXScene::ProcessTriggers()
             WeakPtr<CollisionShape> otherShape = data.otherShape_;
             triggersDataMap_[P_OTHERSHAPE] = otherShape;
             triggersDataMap_[P_OTHERACTOR] = data.otherActor_;
+            triggersDataMap_[P_CONRTOLLERCOLLISION] = data.isControllerTrigger_;
+            triggersDataMap_[P_CONTROLLER] = data.controller_;
             if (triggerShape)
                 triggerShape->SendEvent(data.eventType_, triggersDataMap_);
             /*if (otherShape)
@@ -478,6 +533,8 @@ void Urho3DPhysX::PhysXScene::ProcessCollisions()
             WeakPtr<RigidActor> actorA = data.actorA_;
             WeakPtr<RigidActor> actorB = data.actorB_;
             collisionDataMap_[P_PHYSX_SCENE] = this;
+            collisionDataMap_[P_CONTROLLER] = WeakPtr<KinematicController>(data.controller_);
+            collisionDataMap_[P_CONTROLLERCOLLISION] = data.isControllerCollision_;
             if(actorA)
             {
                 collisionDataMap_[P_ACTOR] = actorA;

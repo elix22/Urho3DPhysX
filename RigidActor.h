@@ -57,6 +57,10 @@ namespace Urho3DPhysX
         WeakPtr<PhysXScene> pxScene_;
         PODVector<Joint*> joints_;
         bool isApplyingTransform_;
+
+        Quaternion lastRotation_;
+        Vector3 lastPosition_;
+
     private:
         ///
         void AddJoint(Joint* joint);

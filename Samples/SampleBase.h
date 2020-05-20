@@ -36,6 +36,7 @@ public:
 
 protected:
     virtual void Update(float timeStep) {};
+    virtual void FixedUpdate(float timeStep) {};
     virtual void OnKeyUp(Key key);
     virtual void OnMouseBtnUp(MouseButton btn);
     virtual void CreateInstructions();
@@ -56,6 +57,7 @@ protected:
     bool updateEnabled_;
 private:
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
+    void HandleFixedUpdate(StringHash eventType, VariantMap& eventData);
     void HandleKeyUp(StringHash eventType, VariantMap& eventData);
     void HandleMouseBtnUp(StringHash eventType, VariantMap& eventData);
 };

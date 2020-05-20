@@ -2,6 +2,7 @@
 #include "Physics.h"
 #include "PhysXScene.h"
 #include "RigidActor.h"
+#include "KinematicController.h"
 #include <Urho3D/IO/Log.h>
 
 Urho3DPhysX::ErrorCallback::ErrorCallback(Physics* physics) :
@@ -74,5 +75,28 @@ void Urho3DPhysX::BroadPhaseCallback::onObjectOutOfBounds(PxShape & shape, PxAct
 }
 
 void Urho3DPhysX::BroadPhaseCallback::onObjectOutOfBounds(PxAggregate & aggregate)
+{
+}
+
+Urho3DPhysX::ControllerHitCallback::ControllerHitCallback()
+{
+
+}
+
+Urho3DPhysX::ControllerHitCallback::~ControllerHitCallback()
+{
+}
+
+void Urho3DPhysX::ControllerHitCallback::onShapeHit(const PxControllerShapeHit& hit)
+{
+    static_cast<KinematicController*>(hit.controller->getUserData())->OnShapeHit(hit);
+}
+
+void Urho3DPhysX::ControllerHitCallback::onControllerHit(const PxControllersHit& hit)
+{
+    static_cast<KinematicController*>(hit.controller->getUserData())->OnControllerHit(hit);
+}
+
+void Urho3DPhysX::ControllerHitCallback::onObstacleHit(const PxControllerObstacleHit& hit)
 {
 }
